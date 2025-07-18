@@ -1,0 +1,278 @@
+<div class="admin-filmes-container">
+  <mat-toolbar color="primary" class="page-header">
+    <span>Gerenciar Filmes</span>
+    <span class="spacer"></span>
+    <button
+      mat-raised-button
+      color="accent"
+      (click)="openForm()"
+      [disabled]="loading()"
+    >
+      <mat-icon>add</mat-icon>
+      Novo Filme
+    </button>
+  </mat-toolbar>
+
+  <div class="content-wrapper">
+    @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Carregando filmes...</p>
+    </div>
+    } @else {
+    <div class="table-container">
+      <table mat-table [dataSource]="filmes()" class="filmes-table">
+        <!-- Poster Column -->
+        <ng-container matColumnDef="posterUrl">
+          <th mat-header-cell *matHeaderCellDef>Poster</th>
+          <td mat-cell *matCellDef="let filme">
+            <div class="poster-container">
+              @if (filme.posterUrl) {
+              <img
+                [src]="filme.posterUrl"
+                [alt]="filme.titulo"
+                class="poster-thumb"
+              />
+              } @else {
+              <mat-icon class="poster-placeholder">movie</mat-icon>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Título Column -->
+        <ng-container matColumnDef="titulo">
+          <th mat-header-cell *matHeaderCellDef>Título</th>
+          <td mat-cell *matCellDef="let filme">
+            <div class="titulo-cell">
+              <strong>{{ filme.titulo }}</strong>
+              <small>{{ filme.diretor }}</small>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Gênero Column -->
+        <ng-container matColumnDef="genero">
+          <th mat-header-cell *matHeaderCellDef>Gênero</th>
+          <td mat-cell *matCellDef="let filme">
+            <mat-chip-row>{{ filme.genero }}</mat-chip-row>
+          </td>
+        </ng-container>
+
+        <!-- Duração Column -->
+        <ng-container matColumnDef="duracao">
+          <th mat-header-cell *matHeaderCellDef>Duração</th>
+          <td mat-cell *matCellDef="let filme">
+            {{ formatDuration(filme.duracao) }}
+          </td>
+        </ng-container>
+
+        <!-- Valor Ingresso Column -->
+        <ng-container matColumnDef="valorIngresso">
+          <th mat-header-cell *matHeaderCellDef>Valor</th>
+          <td mat-cell *matCellDef="let filme">
+            {{ filme.valorIngresso | currency : "BRL" : "symbol" : "1.2-2" }}
+          </td>
+        </ng-container>
+
+        <!-- Em Cartaz Column -->
+        <ng-container matColumnDef="emCartaz">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let filme">
+            <mat-chip-row [color]="filme.emCartaz ? 'primary' : 'warn'">
+              {{ filme.emCartaz ? "Em Cartaz" : "Fora de Cartaz" }}
+            </mat-chip-row>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Ações</th>
+          <td mat-cell *matCellDef="let filme">
+            <div class="action-buttons">
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="openForm(filme)"
+                [disabled]="loading()"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="deleteFilme(filme)"
+                [disabled]="loading()"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+
+      @if (filmes().length === 0) {
+      <div class="empty-state">
+        <mat-icon>movie_filter</mat-icon>
+        <h3>Nenhum filme cadastrado</h3>
+        <p>Clique em "Novo Filme" para começar</p>
+      </div>
+      }
+    </div>
+    }
+  </div>
+
+  <!-- Form Modal -->
+  @if (showForm()) {
+  <div class="modal-overlay" (click)="closeForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <mat-toolbar color="primary" class="modal-header">
+        <span>{{ editingFilme() ? "Editar Filme" : "Novo Filme" }}</span>
+        <span class="spacer"></span>
+        <button mat-icon-button (click)="closeForm()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-toolbar>
+
+      <form [formGroup]="filmeForm" (ngSubmit)="saveFilme()" class="filme-form">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Título</mat-label>
+            <input
+              matInput
+              formControlName="titulo"
+              placeholder="Digite o título do filme"
+            />
+            @if (getErrorMessage('titulo')) {
+            <mat-error>{{ getErrorMessage("titulo") }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Sinopse</mat-label>
+            <textarea
+              matInput
+              formControlName="sinopse"
+              rows="4"
+              placeholder="Digite a sinopse do filme"
+            ></textarea>
+            @if (getErrorMessage('sinopse')) {
+            <mat-error>{{ getErrorMessage("sinopse") }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Gênero</mat-label>
+            <mat-select formControlName="genero">
+              @for (genero of generos; track genero) {
+              <mat-option [value]="genero">{{ genero }}</mat-option>
+              }
+            </mat-select>
+            @if (getErrorMessage('genero')) {
+            <mat-error>{{ getErrorMessage("genero") }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Diretor</mat-label>
+            <input
+              matInput
+              formControlName="diretor"
+              placeholder="Nome do diretor"
+            />
+            @if (getErrorMessage('diretor')) {
+            <mat-error>{{ getErrorMessage("diretor") }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-row" formGroupName="duracao">
+          <mat-form-field appearance="outline" class="quarter-width">
+            <mat-label>Horas</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="hour"
+              min="0"
+              max="10"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="quarter-width">
+            <mat-label>Minutos</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="minute"
+              min="0"
+              max="59"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Valor do Ingresso</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="valorIngresso"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+            />
+            <span matTextPrefix>R$ </span>
+            @if (getErrorMessage('valorIngresso')) {
+            <mat-error>{{ getErrorMessage("valorIngresso") }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>URL do Poster</mat-label>
+            <input
+              matInput
+              formControlName="posterUrl"
+              placeholder="https://exemplo.com/poster.jpg"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-checkbox formControlName="emCartaz">
+            Filme em cartaz
+          </mat-checkbox>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            mat-button
+            (click)="closeForm()"
+            [disabled]="loading()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            mat-raised-button
+            color="primary"
+            [disabled]="filmeForm.invalid || loading()"
+          >
+            @if (loading()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            }
+            {{ editingFilme() ? "Atualizar" : "Criar" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  }
+</div>

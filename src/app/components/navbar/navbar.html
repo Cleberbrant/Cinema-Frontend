@@ -1,0 +1,48 @@
+<header class="navbar">
+  <div class="navbar-container">
+    <div class="navbar-brand">
+      <mat-icon class="navbar-logo">movie</mat-icon>
+      <span class="navbar-title">CinemaMax</span>
+    </div>
+
+    <nav class="navbar-nav">
+      <a routerLink="/home" routerLinkActive="active" class="nav-link"
+        >Início</a
+      >
+      @if (authService.isAuthenticated() && authService.isAdmin()) {
+      <a routerLink="/admin" routerLinkActive="active" class="nav-link"
+        >Administração</a
+      >
+      }
+    </nav>
+
+    <div class="navbar-actions">
+      @if (authService.isAuthenticated()) {
+      <div class="user-menu">
+        <button mat-button [matMenuTriggerFor]="userMenu" class="user-button">
+          <mat-icon>account_circle</mat-icon>
+          <span>{{ authService.currentUser()?.nome }}</span>
+          <mat-icon>arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #userMenu="matMenu">
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sair</span>
+          </button>
+        </mat-menu>
+      </div>
+      } @else {
+      <div class="auth-buttons">
+        <a routerLink="/login" mat-button class="login-btn">Entrar</a>
+        <a
+          routerLink="/registro"
+          mat-raised-button
+          color="accent"
+          class="register-btn"
+          >Cadastrar</a
+        >
+      </div>
+      }
+    </div>
+  </div>
+</header>

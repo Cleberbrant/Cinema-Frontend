@@ -1,0 +1,108 @@
+@if (loading()) {
+<div class="loading-container">
+  <mat-spinner></mat-spinner>
+  <p>Carregando detalhes do filme...</p>
+</div>
+} @else if (filme()) {
+<div class="filme-detalhes">
+  <div class="container">
+    <!-- Detalhes do Filme -->
+    <div class="filme-header">
+      <div class="filme-poster">
+        @if (filme()?.posterUrl) {
+        <img
+          [src]="filme()?.posterUrl"
+          [alt]="filme()?.titulo"
+          class="poster-image"
+        />
+        } @else {
+        <div class="poster-placeholder">
+          <mat-icon>movie</mat-icon>
+          <span>{{ filme()?.titulo }}</span>
+        </div>
+        }
+      </div>
+
+      <div class="filme-info">
+        <h1 class="filme-title">{{ filme()?.titulo }}</h1>
+
+        <div class="filme-meta">
+          <div class="meta-item">
+            <mat-icon>category</mat-icon>
+            <span>{{ filme()?.genero }}</span>
+          </div>
+          <div class="meta-item">
+            <mat-icon>schedule</mat-icon>
+            <span>{{ formatDuracao(filme()?.duracao!) }}</span>
+          </div>
+          <div class="meta-item">
+            <mat-icon>person</mat-icon>
+            <span>{{ filme()?.diretor }}</span>
+          </div>
+        </div>
+
+        <div class="filme-price">
+          <span class="price-label">Valor do Ingresso:</span>
+          <span class="price">R$ {{ filme()!.valorIngresso.toFixed(2) }}</span>
+        </div>
+
+        <div class="filme-sinopse">
+          <h3>Sinopse</h3>
+          <p>{{ filme()?.sinopse }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sessões Disponíveis -->
+    <div class="sessoes-section">
+      <h2 class="section-title">Sessões Disponíveis</h2>
+
+      @if (loadingSessoes()) {
+      <div class="loading">
+        <mat-spinner></mat-spinner>
+        <p>Carregando sessões...</p>
+      </div>
+      } @else if (sessoes().length > 0) {
+      <div class="sessoes-grid">
+        @for (sessao of sessoes(); track sessao.id) {
+        <div class="sessao-card card" (click)="selecionarSessao(sessao)">
+          <div class="sessao-info">
+            <div class="sessao-data">
+              <mat-icon>calendar_today</mat-icon>
+              <span>{{ formatarData(sessao.dataHoraSessao) }}</span>
+            </div>
+            <div class="sessao-hora">
+              <mat-icon>access_time</mat-icon>
+              <span>{{ formatarHora(sessao.dataHoraSessao) }}</span>
+            </div>
+            <div class="sessao-sala">
+              <mat-icon>meeting_room</mat-icon>
+              <span>Sala {{ sessao.salaId }}</span>
+            </div>
+          </div>
+          <button mat-raised-button color="accent" class="comprar-btn">
+            Comprar Ingresso
+          </button>
+        </div>
+        }
+      </div>
+      } @else {
+      <div class="empty-state">
+        <mat-icon>event_busy</mat-icon>
+        <h3>Não há sessões disponíveis</h3>
+        <p>Este filme não possui sessões programadas no momento.</p>
+      </div>
+      }
+    </div>
+  </div>
+</div>
+} @else {
+<div class="error-container">
+  <mat-icon>error</mat-icon>
+  <h2>Filme não encontrado</h2>
+  <p>O filme solicitado não foi encontrado.</p>
+  <button mat-raised-button color="primary" (click)="voltarHome()">
+    Voltar para Home
+  </button>
+</div>
+}

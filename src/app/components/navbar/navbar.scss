@@ -1,0 +1,113 @@
+.navbar {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  color: white;
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .navbar-logo {
+    font-size: 2rem;
+    color: #e94560;
+  }
+
+  .navbar-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+  }
+}
+
+.navbar-nav {
+  display: flex;
+  gap: 2rem;
+
+  .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      color: white;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    &.active {
+      color: #e94560;
+      background-color: rgba(233, 69, 96, 0.1);
+    }
+  }
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-menu {
+  .user-button {
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 1rem;
+
+  .login-btn {
+    color: white;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .register-btn {
+    background-color: #e94560;
+    color: white;
+
+    &:hover {
+      background-color: #d63547;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-container {
+    padding: 1rem;
+  }
+
+  .navbar-nav {
+    display: none;
+  }
+
+  .navbar-brand .navbar-title {
+    font-size: 1.25rem;
+  }
+}

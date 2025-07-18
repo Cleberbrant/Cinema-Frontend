@@ -1,0 +1,197 @@
+<div class="admin-alimentos-container">
+  <mat-toolbar color="primary" class="page-header">
+    <span>Gerenciar Alimentos</span>
+    <span class="spacer"></span>
+    <button
+      mat-raised-button
+      color="accent"
+      (click)="openForm()"
+      [disabled]="loading()"
+    >
+      <mat-icon>add</mat-icon>
+      Novo Alimento
+    </button>
+  </mat-toolbar>
+
+  <div class="content-wrapper">
+    @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Carregando alimentos...</p>
+    </div>
+    } @else {
+    <div class="table-container">
+      <table mat-table [dataSource]="alimentos()" class="alimentos-table">
+        <!-- Nome Column -->
+        <ng-container matColumnDef="nome">
+          <th mat-header-cell *matHeaderCellDef>Nome</th>
+          <td mat-cell *matCellDef="let alimento">
+            <div class="alimento-info">
+              <strong>{{ alimento.nome }}</strong>
+              <small>{{ alimento.descricao }}</small>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Tipo Column -->
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef>Tipo</th>
+          <td mat-cell *matCellDef="let alimento">
+            <mat-chip-row>{{ alimento.tipo }}</mat-chip-row>
+          </td>
+        </ng-container>
+
+        <!-- Preço Column -->
+        <ng-container matColumnDef="preco">
+          <th mat-header-cell *matHeaderCellDef>Preço</th>
+          <td mat-cell *matCellDef="let alimento">
+            <span class="preco">{{
+              alimento.preco | currency : "BRL" : "symbol" : "1.2-2"
+            }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Ações</th>
+          <td mat-cell *matCellDef="let alimento">
+            <div class="action-buttons">
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="openForm(alimento)"
+                [disabled]="loading()"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="deleteAlimento(alimento)"
+                [disabled]="loading()"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+
+      @if (alimentos().length === 0) {
+      <div class="empty-state">
+        <mat-icon>restaurant</mat-icon>
+        <h3>Nenhum alimento cadastrado</h3>
+        <p>Clique em "Novo Alimento" para começar</p>
+      </div>
+      }
+    </div>
+    }
+  </div>
+
+  <!-- Form Modal -->
+  @if (showForm()) {
+  <div class="modal-overlay" (click)="closeForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <mat-toolbar color="primary" class="modal-header">
+        <span>{{
+          editingAlimento() ? "Editar Alimento" : "Novo Alimento"
+        }}</span>
+        <span class="spacer"></span>
+        <button mat-icon-button (click)="closeForm()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-toolbar>
+
+      <form
+        [formGroup]="alimentoForm"
+        (ngSubmit)="saveAlimento()"
+        class="alimento-form"
+      >
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nome</mat-label>
+            <input
+              matInput
+              formControlName="nome"
+              placeholder="Digite o nome do alimento"
+            />
+            @if (getErrorMessage('nome')) {
+            <mat-error>{{ getErrorMessage("nome") }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descrição</mat-label>
+            <textarea
+              matInput
+              formControlName="descricao"
+              rows="3"
+              placeholder="Digite a descrição do alimento"
+            ></textarea>
+            @if (getErrorMessage('descricao')) {
+            <mat-error>{{ getErrorMessage("descricao") }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Tipo</mat-label>
+            <mat-select formControlName="tipo">
+              @for (tipo of tiposAlimento; track tipo) {
+              <mat-option [value]="tipo">{{ tipo }}</mat-option>
+              }
+            </mat-select>
+            @if (getErrorMessage('tipo')) {
+            <mat-error>{{ getErrorMessage("tipo") }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Preço</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="preco"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+            />
+            <span matTextPrefix>R$ </span>
+            @if (getErrorMessage('preco')) {
+            <mat-error>{{ getErrorMessage("preco") }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            mat-button
+            (click)="closeForm()"
+            [disabled]="loading()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            mat-raised-button
+            color="primary"
+            [disabled]="alimentoForm.invalid || loading()"
+          >
+            @if (loading()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            }
+            {{ editingAlimento() ? "Atualizar" : "Criar" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  }
+</div>

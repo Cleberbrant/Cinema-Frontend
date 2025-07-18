@@ -1,0 +1,88 @@
+<div class="dashboard">
+  <div class="container">
+    <div class="dashboard-header">
+      <h1>Painel Administrativo</h1>
+      <p>Gerencie seu sistema de cinema</p>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="card stat-card" routerLink="/admin/filmes">
+        <div class="stat-content">
+          <mat-icon class="stat-icon">movie</mat-icon>
+          <div class="stat-info">
+            <h3>Filmes</h3>
+            <p class="stat-number">{{ totalFilmes }}</p>
+            <span class="stat-label">Cadastrados</span>
+          </div>
+        </div>
+        <button mat-icon-button class="card-action">
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+
+      <div class="card stat-card" routerLink="/admin/cinemas">
+        <div class="stat-content">
+          <mat-icon class="stat-icon">location_city</mat-icon>
+          <div class="stat-info">
+            <h3>Cinemas</h3>
+            <p class="stat-number">{{ totalCinemas }}</p>
+            <span class="stat-label">Ativos</span>
+          </div>
+        </div>
+        <button mat-icon-button class="card-action">
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+
+      <div class="card stat-card" routerLink="/admin/sessoes">
+        <div class="stat-content">
+          <mat-icon class="stat-icon">event</mat-icon>
+          <div class="stat-info">
+            <h3>Sessões</h3>
+            <p class="stat-number">{{ totalSessoes }}</p>
+            <span class="stat-label">Hoje</span>
+          </div>
+        </div>
+        <button mat-icon-button class="card-action">
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+
+      <div class="card stat-card" routerLink="/admin/alimentos">
+        <div class="stat-content">
+          <mat-icon class="stat-icon">local_dining</mat-icon>
+          <div class="stat-info">
+            <h3>Alimentos</h3>
+            <p class="stat-number">{{ totalAlimentos }}</p>
+            <span class="stat-label">Disponíveis</span>
+          </div>
+        </div>
+        <button mat-icon-button class="card-action">
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <h2>Ações Rápidas</h2>
+      <div class="actions-grid">
+        <button mat-raised-button color="primary" routerLink="/admin/filmes">
+          <mat-icon>add</mat-icon>
+          Novo Filme
+        </button>
+        <button mat-raised-button color="accent" routerLink="/admin/cinemas">
+          <mat-icon>add_location</mat-icon>
+          Novo Cinema
+        </button>
+        <button mat-raised-button routerLink="/admin/sessoes">
+          <mat-icon>schedule</mat-icon>
+          Nova Sessão
+        </button>
+        <button mat-raised-button routerLink="/admin/alimentos">
+          <mat-icon>restaurant</mat-icon>
+          Novo Alimento
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

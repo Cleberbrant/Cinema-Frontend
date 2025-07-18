@@ -1,0 +1,164 @@
+<div class="admin-cinemas-container">
+  <mat-toolbar color="primary" class="page-header">
+    <span>Gerenciar Cinemas</span>
+    <span class="spacer"></span>
+    <button
+      mat-raised-button
+      color="accent"
+      (click)="openForm()"
+      [disabled]="loading()"
+    >
+      <mat-icon>add</mat-icon>
+      Novo Cinema
+    </button>
+  </mat-toolbar>
+
+  <div class="content-wrapper">
+    @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Carregando cinemas...</p>
+    </div>
+    } @else {
+    <div class="table-container">
+      <table mat-table [dataSource]="cinemas()" class="cinemas-table">
+        <!-- Nome Column -->
+        <ng-container matColumnDef="nome">
+          <th mat-header-cell *matHeaderCellDef>Nome</th>
+          <td mat-cell *matCellDef="let cinema">
+            <div class="cinema-name">
+              <strong>{{ cinema.nome }}</strong>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Localidade Column -->
+        <ng-container matColumnDef="localidade">
+          <th mat-header-cell *matHeaderCellDef>Localização</th>
+          <td mat-cell *matCellDef="let cinema">
+            <div class="localidade-info">
+              <div>{{ cinema.localidade?.endereco }}</div>
+              <small>CEP: {{ cinema.localidade?.cep }}</small>
+              @if (cinema.localidade?.referencia) {
+              <small>Ref: {{ cinema.localidade?.referencia }}</small>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Ações</th>
+          <td mat-cell *matCellDef="let cinema">
+            <div class="action-buttons">
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="openForm(cinema)"
+                [disabled]="loading()"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="deleteCinema(cinema)"
+                [disabled]="loading()"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+
+      @if (cinemas().length === 0) {
+      <div class="empty-state">
+        <mat-icon>location_city</mat-icon>
+        <h3>Nenhum cinema cadastrado</h3>
+        <p>Clique em "Novo Cinema" para começar</p>
+      </div>
+      }
+    </div>
+    }
+  </div>
+
+  <!-- Form Modal -->
+  @if (showForm()) {
+  <div class="modal-overlay" (click)="closeForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <mat-toolbar color="primary" class="modal-header">
+        <span>{{ editingCinema() ? "Editar Cinema" : "Novo Cinema" }}</span>
+        <span class="spacer"></span>
+        <button mat-icon-button (click)="closeForm()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-toolbar>
+
+      <form
+        [formGroup]="cinemaForm"
+        (ngSubmit)="saveCinema()"
+        class="cinema-form"
+      >
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nome do Cinema</mat-label>
+            <input
+              matInput
+              formControlName="nome"
+              placeholder="Digite o nome do cinema"
+            />
+            @if (getErrorMessage('nome')) {
+            <mat-error>{{ getErrorMessage("nome") }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Localidade</mat-label>
+            <mat-select formControlName="localidadeId">
+              @for (localidade of localidades(); track localidade.id) {
+              <mat-option [value]="localidade.id">
+                {{ localidade.endereco }} - CEP: {{ localidade.cep }}
+                @if (localidade.referencia) {
+                <br /><small>{{ localidade.referencia }}</small>
+                }
+              </mat-option>
+              }
+            </mat-select>
+            @if (getErrorMessage('localidadeId')) {
+            <mat-error>{{ getErrorMessage("localidadeId") }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            mat-button
+            (click)="closeForm()"
+            [disabled]="loading()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            mat-raised-button
+            color="primary"
+            [disabled]="cinemaForm.invalid || loading()"
+          >
+            @if (loading()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            }
+            {{ editingCinema() ? "Atualizar" : "Criar" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  }
+</div>

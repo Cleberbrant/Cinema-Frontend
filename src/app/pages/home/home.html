@@ -1,0 +1,116 @@
+<div class="home">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">Bem-vindo ao CinemaMax</h1>
+      <p class="hero-subtitle">
+        Descubra os melhores filmes em cartaz em nossos cinemas
+      </p>
+      <button
+        mat-raised-button
+        color="accent"
+        class="hero-cta"
+        (click)="scrollToFilmes()"
+      >
+        Ver Filmes em Cartaz
+      </button>
+    </div>
+    <div class="hero-image">
+      <mat-icon class="hero-icon">movie</mat-icon>
+    </div>
+  </section>
+
+  <div class="container">
+    <!-- Seção de Cinemas -->
+    <section class="section" id="cinemas">
+      <div class="section-header">
+        <h2 class="section-title">Nossos Cinemas</h2>
+        <p class="section-subtitle">Encontre o cinema mais próximo de você</p>
+      </div>
+
+      @if (loading()) {
+      <div class="loading">
+        <mat-spinner></mat-spinner>
+        <p>Carregando cinemas...</p>
+      </div>
+      } @else {
+      <div class="grid grid-3">
+        @for (cinema of cinemas(); track cinema.id) {
+        <div class="card cinema-card">
+          <div class="cinema-header">
+            <mat-icon class="cinema-icon">location_city</mat-icon>
+            <h3 class="cinema-name">{{ cinema.nome }}</h3>
+          </div>
+          <div class="cinema-details">
+            <div class="cinema-location">
+              <mat-icon>place</mat-icon>
+              <span>{{ cinema.localidade.endereco }}</span>
+            </div>
+            <div class="cinema-reference">
+              <span>{{ cinema.localidade.referencia }}</span>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </section>
+
+    <!-- Seção de Filmes em Cartaz -->
+    <section class="section" id="filmes">
+      <div class="section-header">
+        <h2 class="section-title">Filmes em Cartaz</h2>
+        <p class="section-subtitle">
+          Confira os lançamentos e filmes em exibição
+        </p>
+      </div>
+
+      @if (loadingFilmes()) {
+      <div class="loading">
+        <mat-spinner></mat-spinner>
+        <p>Carregando filmes...</p>
+      </div>
+      } @else {
+      <div class="grid grid-4">
+        @for (filme of filmesEmCartaz(); track filme.id) {
+        <div class="card filme-card" (click)="verDetalhesFilme(filme.id!)">
+          <div class="filme-poster">
+            @if (filme.posterUrl) {
+            <img
+              [src]="filme.posterUrl"
+              [alt]="filme.titulo"
+              class="poster-image"
+            />
+            } @else {
+            <div class="poster-placeholder">
+              <mat-icon>movie</mat-icon>
+              <span>{{ filme.titulo }}</span>
+            </div>
+            }
+          </div>
+          <div class="filme-content">
+            <h3 class="filme-title">{{ filme.titulo }}</h3>
+            <div class="filme-meta">
+              <span class="filme-genero">{{ filme.genero }}</span>
+              <span class="filme-duracao">{{
+                formatDuracao(filme.duracao)
+              }}</span>
+            </div>
+            <div class="filme-director">
+              <mat-icon>person</mat-icon>
+              <span>{{ filme.diretor }}</span>
+            </div>
+            <div class="filme-price">
+              <span class="price">R$ {{ filme.valorIngresso.toFixed(2) }}</span>
+            </div>
+            <button mat-raised-button color="accent" class="filme-btn">
+              Ver Sessões
+            </button>
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </section>
+  </div>
+</div>

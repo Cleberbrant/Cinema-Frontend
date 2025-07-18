@@ -1,0 +1,21 @@
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.admin-content {
+  flex: 1;
+  margin-left: 280px;
+  height: 100vh;
+  overflow: auto;
+  background-color: var(--background-color);
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .admin-content {
+    margin-left: 0;
+    width: 100%;
+  }
+}

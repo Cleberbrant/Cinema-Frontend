@@ -1,0 +1,26 @@
+<div class="admin-sidebar">
+  <div class="sidebar-header">
+    <mat-icon class="sidebar-logo">admin_panel_settings</mat-icon>
+    <h3>Administração</h3>
+  </div>
+
+  <nav class="sidebar-nav">
+    <mat-list>
+      @for (item of menuItems; track item.route) {
+      <mat-list-item>
+        <a [routerLink]="item.route" routerLinkActive="active" class="nav-item">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
+        </a>
+      </mat-list-item>
+      }
+    </mat-list>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button mat-button routerLink="/home" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+      Voltar ao Site
+    </button>
+  </div>
+</div>

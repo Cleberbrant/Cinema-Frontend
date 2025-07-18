@@ -1,0 +1,221 @@
+.admin-sessoes-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-color);
+}
+
+.page-header {
+  flex-shrink: 0;
+
+  .spacer {
+    flex: 1;
+  }
+
+  button {
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+.content-wrapper {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  gap: 16px;
+
+  p {
+    color: var(--text-secondary);
+    margin: 0;
+  }
+}
+
+.table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.sessoes-table {
+  width: 100%;
+
+  .mat-mdc-header-cell {
+    background-color: var(--surface-color);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .mat-mdc-cell {
+    padding: 16px 8px;
+  }
+}
+
+.filme-info {
+  strong {
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    margin: 0 0 8px 0;
+    color: var(--text-primary);
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+// Modal Styles
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  flex-shrink: 0;
+
+  .spacer {
+    flex: 1;
+  }
+}
+
+// Form Styles
+.sessao-form {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .full-width {
+    flex: 1;
+  }
+
+  mat-form-field {
+    mat-label {
+      color: var(--text-primary);
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+  margin-top: 24px;
+
+  button {
+    min-width: 120px;
+
+    mat-spinner {
+      margin-right: 8px;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: 16px;
+  }
+
+  .modal-overlay {
+    padding: 16px;
+  }
+
+  .modal-content {
+    max-height: 95vh;
+  }
+
+  .sessao-form {
+    padding: 16px;
+  }
+
+  .sessoes-table {
+    .mat-mdc-cell,
+    .mat-mdc-header-cell {
+      padding: 8px 4px;
+      font-size: 12px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    .mat-toolbar-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      height: auto;
+      padding: 16px;
+    }
+
+    button {
+      align-self: stretch;
+    }
+  }
+}
