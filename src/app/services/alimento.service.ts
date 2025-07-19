@@ -9,6 +9,7 @@ import { Alimento } from '../models';
 })
 export class AlimentoService {
   private apiUrl = `${environment.apiUrl}/alimentos`;
+  private apiUrlSingular = `${environment.apiUrl}/alimento`; // Para testar endpoint singular
 
   constructor(private http: HttpClient) {}
 
@@ -21,14 +22,23 @@ export class AlimentoService {
   }
 
   createAlimento(alimento: Alimento): Observable<Alimento> {
+    console.log('AlimentoService - createAlimento called with:', alimento);
     return this.http.post<Alimento>(this.apiUrl, alimento);
   }
 
   updateAlimento(id: number, alimento: Alimento): Observable<Alimento> {
-    return this.http.put<Alimento>(`${this.apiUrl}/${id}`, alimento);
+    const url = `${this.apiUrlSingular}/${id}`;
+    console.log('AlimentoService - updateAlimento called with:', {
+      id,
+      alimento,
+    });
+    console.log('AlimentoService - full URL (singular):', url);
+    console.log('AlimentoService - apiUrl:', this.apiUrl);
+    return this.http.put<Alimento>(url, alimento);
   }
 
   deleteAlimento(id: number): Observable<void> {
+    console.log('AlimentoService - deleteAlimento called with id:', id);
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

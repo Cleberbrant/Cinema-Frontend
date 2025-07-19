@@ -76,15 +76,19 @@ export class AdminAlimentos implements OnInit {
     try {
       this.alimentoService.getAlimentos().subscribe({
         next: (alimentos) => {
+          console.log('Alimentos loaded:', alimentos);
           this.alimentos.set(alimentos);
+          this.loading.set(false);
         },
         error: (error) => {
+          console.error('Erro ao carregar alimentos:', error);
           this.toastr.error('Erro ao carregar alimentos', 'Erro');
+          this.loading.set(false);
         },
       });
     } catch (error) {
+      console.error('Erro ao carregar alimentos:', error);
       this.toastr.error('Erro ao carregar alimentos', 'Erro');
-    } finally {
       this.loading.set(false);
     }
   }
@@ -116,12 +120,20 @@ export class AdminAlimentos implements OnInit {
       this.loading.set(true);
       try {
         const formValue = { ...this.alimentoForm.value };
+        console.log('Form value:', formValue);
 
         if (this.editingAlimento()) {
+          console.log(
+            'Updating alimento:',
+            this.editingAlimento()!.id!,
+            formValue
+          );
           this.alimentoService
             .updateAlimento(this.editingAlimento()!.id!, formValue)
             .subscribe({
-              next: () => {
+              next: (response) => {
+                console.log('Alimento updated successfully:', response);
+                this.loading.set(false);
                 this.toastr.success(
                   'Alimento atualizado com sucesso!',
                   'Sucesso'
@@ -129,25 +141,31 @@ export class AdminAlimentos implements OnInit {
                 this.closeForm();
                 this.loadAlimentos();
               },
-              error: () => {
+              error: (error) => {
+                console.error('Erro ao atualizar alimento:', error);
                 this.toastr.error('Erro ao atualizar alimento', 'Erro');
                 this.loading.set(false);
               },
             });
         } else {
+          console.log('Creating alimento:', formValue);
           this.alimentoService.createAlimento(formValue).subscribe({
-            next: () => {
+            next: (response) => {
+              console.log('Alimento created successfully:', response);
+              this.loading.set(false);
               this.toastr.success('Alimento criado com sucesso!', 'Sucesso');
               this.closeForm();
               this.loadAlimentos();
             },
-            error: () => {
+            error: (error) => {
+              console.error('Erro ao criar alimento:', error);
               this.toastr.error('Erro ao criar alimento', 'Erro');
               this.loading.set(false);
             },
           });
         }
       } catch (error) {
+        console.error('Erro ao salvar alimento:', error);
         this.toastr.error('Erro ao salvar alimento', 'Erro');
         this.loading.set(false);
       }
@@ -158,17 +176,22 @@ export class AdminAlimentos implements OnInit {
     if (confirm(`Deseja realmente excluir o alimento "${alimento.nome}"?`)) {
       this.loading.set(true);
       try {
+        console.log('Deleting alimento:', alimento.id);
         this.alimentoService.deleteAlimento(alimento.id!).subscribe({
           next: () => {
+            console.log('Alimento deleted successfully');
+            this.loading.set(false);
             this.toastr.success('Alimento excluído com sucesso!', 'Sucesso');
             this.loadAlimentos();
           },
-          error: () => {
+          error: (error) => {
+            console.error('Erro ao excluir alimento:', error);
             this.toastr.error('Erro ao excluir alimento', 'Erro');
             this.loading.set(false);
           },
         });
       } catch (error) {
+        console.error('Erro ao excluir alimento:', error);
         this.toastr.error('Erro ao excluir alimento', 'Erro');
         this.loading.set(false);
       }

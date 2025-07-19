@@ -9,7 +9,8 @@
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 100;
+  z-index: 10; // Menor que o navbar
+  padding-top: 64px; // Espaço para o navbar
 }
 
 .sidebar-header {

@@ -23,7 +23,13 @@ import { ToastrService } from 'ngx-toastr';
 import { SessaoService } from '../../../services/sessao.service';
 import { FilmeService } from '../../../services/filme.service';
 import { SalaService } from '../../../services/sala.service';
-import { Sessao, Filme, Sala } from '../../../models';
+import {
+  Sessao,
+  Filme,
+  Sala,
+  CreateSessaoRequest,
+  UpdateSessaoRequest,
+} from '../../../models';
 
 @Component({
   selector: 'app-admin-sessoes',
@@ -66,8 +72,8 @@ export class AdminSessoes implements OnInit {
     private toastr: ToastrService
   ) {
     this.sessaoForm = this.fb.group({
-      filmeId: ['', Validators.required],
-      salaId: ['', Validators.required],
+      filmeId: ['', [Validators.required, Validators.min(1)]],
+      salaId: ['', [Validators.required, Validators.min(1)]],
       dataHoraSessao: ['', Validators.required],
     });
   }
@@ -84,6 +90,8 @@ export class AdminSessoes implements OnInit {
         this.loadFilmes(),
         this.loadSalas(),
       ]);
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
     } finally {
       this.loading.set(false);
     }
@@ -93,14 +101,25 @@ export class AdminSessoes implements OnInit {
     try {
       this.sessaoService.getSessoes().subscribe({
         next: (sessoes) => {
+          console.log('Sessões carregadas:', sessoes);
           this.sessoes.set(sessoes);
+          this.loading.set(false); // Garantir que o loading seja desabilitado
         },
         error: (error) => {
-          this.toastr.error('Erro ao carregar sessões', 'Erro');
+          console.error('Erro ao carregar sessões:', error);
+          if (error.status === 404) {
+            console.log('Nenhuma sessão encontrada, definindo array vazio');
+            this.sessoes.set([]);
+          } else {
+            this.toastr.error('Erro ao carregar sessões', 'Erro');
+          }
+          this.loading.set(false); // Garantir que o loading seja desabilitado mesmo em caso de erro
         },
       });
     } catch (error) {
+      console.error('Erro ao carregar sessões:', error);
       this.toastr.error('Erro ao carregar sessões', 'Erro');
+      this.loading.set(false); // Garantir que o loading seja desabilitado
     }
   }
 
@@ -108,13 +127,20 @@ export class AdminSessoes implements OnInit {
     try {
       this.filmeService.getFilmes().subscribe({
         next: (filmes) => {
-          this.filmes.set(filmes);
+          console.log('Filmes carregados:', filmes);
+          // Filtrar apenas filmes em cartaz
+          const filmesEmCartaz = filmes.filter(
+            (filme) => filme.emCartaz !== false
+          );
+          this.filmes.set(filmesEmCartaz);
         },
         error: (error) => {
+          console.error('Erro ao carregar filmes:', error);
           this.toastr.error('Erro ao carregar filmes', 'Erro');
         },
       });
     } catch (error) {
+      console.error('Erro ao carregar filmes:', error);
       this.toastr.error('Erro ao carregar filmes', 'Erro');
     }
   }
@@ -123,26 +149,42 @@ export class AdminSessoes implements OnInit {
     try {
       this.salaService.getSalas().subscribe({
         next: (salas) => {
+          console.log('Salas carregadas:', salas);
           this.salas.set(salas);
         },
         error: (error) => {
+          console.error('Erro ao carregar salas:', error);
           this.toastr.error('Erro ao carregar salas', 'Erro');
         },
       });
     } catch (error) {
+      console.error('Erro ao carregar salas:', error);
       this.toastr.error('Erro ao carregar salas', 'Erro');
     }
   }
 
   openForm(sessao?: Sessao) {
     if (sessao) {
+      console.log('Editando sessão:', sessao);
       this.editingSessao.set(sessao);
+
+      // Converter a data para o formato datetime-local
+      let dataFormatada = '';
+      if (sessao.dataHoraSessao) {
+        const data = new Date(sessao.dataHoraSessao);
+        // Formato datetime-local: YYYY-MM-DDTHH:mm
+        dataFormatada = data.toISOString().slice(0, 16);
+      }
+
       this.sessaoForm.patchValue({
         filmeId: sessao.filmeId,
         salaId: sessao.salaId,
-        dataHoraSessao: new Date(sessao.dataHoraSessao),
+        dataHoraSessao: dataFormatada,
       });
+
+      console.log('Form values after patch:', this.sessaoForm.value);
     } else {
+      console.log('Criando nova sessão');
       this.editingSessao.set(null);
       this.sessaoForm.reset();
     }
@@ -156,46 +198,181 @@ export class AdminSessoes implements OnInit {
   }
 
   async saveSessao() {
+    console.log('=== INICIANDO SAVE SESSAO ===');
+    console.log('Form valid:', this.sessaoForm.valid);
+    console.log('Form value:', this.sessaoForm.value);
+
     if (this.sessaoForm.valid) {
       this.loading.set(true);
       try {
         const formValue = { ...this.sessaoForm.value };
-        formValue.dataHoraSessao = formValue.dataHoraSessao.toISOString();
+        console.log('Form value before processing:', formValue);
+
+        // Validar se os IDs são números válidos
+        const filmeId = Number(formValue.filmeId);
+        const salaId = Number(formValue.salaId);
+
+        console.log('IDs processados:', { filmeId, salaId });
+
+        if (!filmeId || filmeId <= 0) {
+          console.error('Filme ID inválido:', filmeId);
+          this.toastr.error('Filme inválido selecionado', 'Erro');
+          this.loading.set(false);
+          return;
+        }
+
+        if (!salaId || salaId <= 0) {
+          console.error('Sala ID inválida:', salaId);
+          this.toastr.error('Sala inválida selecionada', 'Erro');
+          this.loading.set(false);
+          return;
+        }
+
+        // Verificar se dataHoraSessao é uma string ou objeto Date
+        let dataHoraSessao: string;
+        if (formValue.dataHoraSessao instanceof Date) {
+          dataHoraSessao = formValue.dataHoraSessao.toISOString();
+        } else if (
+          typeof formValue.dataHoraSessao === 'string' &&
+          formValue.dataHoraSessao
+        ) {
+          // Para inputs datetime-local, o formato é YYYY-MM-DDTHH:mm
+          // Converter para formato que o backend Java aceita
+          const data = new Date(formValue.dataHoraSessao);
+          if (isNaN(data.getTime())) {
+            console.error('Data inválida:', formValue.dataHoraSessao);
+            this.toastr.error('Data e hora inválidas', 'Erro');
+            this.loading.set(false);
+            return;
+          }
+          // Formato ISO sem milissegundos e com timezone UTC
+          dataHoraSessao = data.toISOString().slice(0, 19);
+        } else {
+          console.error('Data não fornecida:', formValue.dataHoraSessao);
+          this.toastr.error('Data e hora são obrigatórias', 'Erro');
+          this.loading.set(false);
+          return;
+        }
+
+        console.log('Data processada:', dataHoraSessao);
+
+        // Verificar se a data não é no passado
+        const agora = new Date();
+        const dataSessao = new Date(dataHoraSessao);
+        console.log('Comparação de datas:', {
+          agora,
+          dataSessao,
+          isFuture: dataSessao > agora,
+        });
+
+        if (dataSessao <= agora) {
+          this.toastr.error('A data da sessão deve ser no futuro', 'Erro');
+          this.loading.set(false);
+          return;
+        }
+
+        const sessaoData: CreateSessaoRequest = {
+          filmeId: filmeId,
+          salaId: salaId,
+          dataHoraSessao: dataHoraSessao,
+        };
+
+        console.log('Dados finais da sessão:', sessaoData);
 
         if (this.editingSessao()) {
+          console.log('=== EDITANDO SESSAO ===');
+          const updateData: UpdateSessaoRequest = sessaoData;
           this.sessaoService
-            .updateSessao(this.editingSessao()!.id!, formValue)
+            .updateSessao(this.editingSessao()!.id!, updateData)
             .subscribe({
-              next: () => {
+              next: (response) => {
+                console.log('Update response:', response);
+                this.loading.set(false); // Desabilitar loading primeiro
                 this.toastr.success(
                   'Sessão atualizada com sucesso!',
                   'Sucesso'
                 );
                 this.closeForm();
-                this.loadSessoes();
+                // Recarregar sessões sem mexer no loading global
+                this.sessaoService.getSessoes().subscribe({
+                  next: (sessoes) => this.sessoes.set(sessoes),
+                  error: (error) =>
+                    console.error('Erro ao recarregar sessões:', error),
+                });
               },
-              error: () => {
+              error: (error) => {
+                console.error('Erro ao atualizar sessão:', error);
                 this.toastr.error('Erro ao atualizar sessão', 'Erro');
                 this.loading.set(false);
               },
             });
         } else {
-          this.sessaoService.createSessao(formValue).subscribe({
-            next: () => {
+          console.log('=== CRIANDO NOVA SESSAO ===');
+          this.sessaoService.createSessao(sessaoData).subscribe({
+            next: (response) => {
+              console.log('Create response:', response);
+              this.loading.set(false); // Desabilitar loading primeiro
               this.toastr.success('Sessão criada com sucesso!', 'Sucesso');
               this.closeForm();
-              this.loadSessoes();
+              // Recarregar sessões sem mexer no loading global
+              this.sessaoService.getSessoes().subscribe({
+                next: (sessoes) => this.sessoes.set(sessoes),
+                error: (error) =>
+                  console.error('Erro ao recarregar sessões:', error),
+              });
             },
-            error: () => {
-              this.toastr.error('Erro ao criar sessão', 'Erro');
+            error: (error) => {
+              console.error('=== ERRO AO CRIAR SESSAO ===');
+              console.error('Error object:', error);
+              console.error('Error details:', {
+                status: error.status,
+                statusText: error.statusText,
+                message: error.message,
+                error: error.error,
+                url: error.url,
+              });
+
+              if (error.error && typeof error.error === 'object') {
+                console.error('Backend error details:', error.error);
+              }
+
+              if (error.status === 500) {
+                this.toastr.error(
+                  'Erro interno do servidor. Verifique os dados e tente novamente.',
+                  'Erro'
+                );
+              } else if (error.status === 400) {
+                this.toastr.error(
+                  'Dados inválidos. Verifique os campos.',
+                  'Erro'
+                );
+              } else if (error.status === 409) {
+                this.toastr.error(
+                  'Conflito: Sessão já existe neste horário.',
+                  'Erro'
+                );
+              } else {
+                this.toastr.error('Erro ao criar sessão', 'Erro');
+              }
               this.loading.set(false);
             },
           });
         }
       } catch (error) {
+        console.error('Erro geral ao salvar sessão:', error);
         this.toastr.error('Erro ao salvar sessão', 'Erro');
         this.loading.set(false);
       }
+    } else {
+      console.log('=== FORM INVÁLIDO ===');
+      console.log('Form errors:', this.sessaoForm.errors);
+      Object.keys(this.sessaoForm.controls).forEach((key) => {
+        const control = this.sessaoForm.get(key);
+        if (control && control.invalid) {
+          console.log(`${key} errors:`, control.errors);
+        }
+      });
+      this.toastr.error('Preencha todos os campos obrigatórios', 'Erro');
     }
   }
 
@@ -205,16 +382,33 @@ export class AdminSessoes implements OnInit {
       this.loading.set(true);
       try {
         this.sessaoService.deleteSessao(sessao.id!).subscribe({
-          next: () => {
+          next: (response) => {
+            console.log('Delete response:', response);
+            this.loading.set(false); // Desabilitar loading primeiro
             this.toastr.success('Sessão excluída com sucesso!', 'Sucesso');
-            this.loadSessoes();
+            // Recarregar sessões sem mexer no loading global
+            this.sessaoService.getSessoes().subscribe({
+              next: (sessoes) => this.sessoes.set(sessoes),
+              error: (error) =>
+                console.error('Erro ao recarregar sessões:', error),
+            });
           },
-          error: () => {
-            this.toastr.error('Erro ao excluir sessão', 'Erro');
+          error: (error) => {
+            console.error('Erro ao excluir sessão:', error);
+            if (error.status === 404) {
+              this.toastr.error('Sessão não encontrada', 'Erro');
+            } else if (error.status === 403) {
+              this.toastr.error('Acesso negado', 'Erro');
+            } else if (error.status === 401) {
+              this.toastr.error('Não autorizado', 'Erro');
+            } else {
+              this.toastr.error('Erro ao excluir sessão', 'Erro');
+            }
             this.loading.set(false);
           },
         });
       } catch (error) {
+        console.error('Erro ao excluir sessão:', error);
         this.toastr.error('Erro ao excluir sessão', 'Erro');
         this.loading.set(false);
       }
@@ -233,6 +427,14 @@ export class AdminSessoes implements OnInit {
   getSalaNome(salaId: number): string {
     const sala = this.salas().find((s) => s.id === salaId);
     return sala ? `Sala ${sala.numeroDaSala}` : '';
+  }
+
+  getCurrentDateTime(): string {
+    const agora = new Date();
+    // Adicionar 1 hora para dar uma margem
+    agora.setHours(agora.getHours() + 1);
+    // Formato YYYY-MM-DDTHH:mm para datetime-local
+    return agora.toISOString().slice(0, 16);
   }
 
   getErrorMessage(field: string): string {

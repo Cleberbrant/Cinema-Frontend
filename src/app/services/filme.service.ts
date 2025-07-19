@@ -35,6 +35,8 @@ export class FilmeService {
   }
 
   deleteFilme(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    const url = `${this.apiUrl}/${id}`;
+    console.log('Tentando DELETE para URL:', url);
+    return this.http.delete<void>(url);
   }
 }

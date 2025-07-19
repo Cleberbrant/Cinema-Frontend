@@ -20,11 +20,11 @@ export class CinemaService {
     return this.http.get<Cinema>(`${this.apiUrl}/${id}`);
   }
 
-  createCinema(cinema: Cinema): Observable<Cinema> {
+  createCinema(cinema: any): Observable<Cinema> {
     return this.http.post<Cinema>(this.apiUrl, cinema);
   }
 
-  updateCinema(id: number, cinema: Cinema): Observable<Cinema> {
+  updateCinema(id: number, cinema: any): Observable<Cinema> {
     return this.http.put<Cinema>(`${this.apiUrl}/${id}`, cinema);
   }
 

@@ -7,6 +7,9 @@
 
 .page-header {
   flex-shrink: 0;
+  position: sticky;
+  top: -8px;
+  z-index: 10;
 
   .spacer {
     flex: 1;
@@ -142,6 +145,16 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-content {
@@ -154,6 +167,19 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease-out;
+  transform: scale(1);
+}
+
+@keyframes slideIn {
+  from {
+    transform: scale(0.95) translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
 }
 
 .modal-header {
@@ -169,11 +195,18 @@
   padding: 24px;
   overflow-y: auto;
   flex: 1;
+  min-height: 0; // Força o flex a calcular corretamente
+
+  // Garantir que o formulário seja visível desde o início
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
 
   .form-row {
     display: flex;
     gap: 16px;
     margin-bottom: 16px;
+    align-items: flex-start;
 
     &:last-child {
       margin-bottom: 0;
@@ -182,19 +215,29 @@
 
   .full-width {
     flex: 1;
+    min-width: 0; // Previne overflow
   }
 
   .half-width {
     flex: 0.5;
+    min-width: 0;
   }
 
   .quarter-width {
     flex: 0.25;
+    min-width: 0;
   }
 
   mat-form-field {
+    width: 100%;
+
     mat-label {
       color: var(--text-primary);
+    }
+
+    // Força a renderização dos campos
+    .mat-mdc-form-field-wrapper {
+      opacity: 1;
     }
   }
 

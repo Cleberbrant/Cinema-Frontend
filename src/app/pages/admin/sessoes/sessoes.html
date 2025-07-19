@@ -113,8 +113,9 @@
               <mat-option [value]="filme.id">{{ filme.titulo }}</mat-option>
               }
             </mat-select>
-            @if (getErrorMessage('filmeId')) {
-            <mat-error>{{ getErrorMessage("filmeId") }}</mat-error>
+            @if (sessaoForm.get('filmeId')?.hasError('required') &&
+            sessaoForm.get('filmeId')?.touched) {
+            <mat-error>Filme é obrigatório</mat-error>
             }
           </mat-form-field>
         </div>
@@ -132,8 +133,9 @@
               </mat-option>
               }
             </mat-select>
-            @if (getErrorMessage('salaId')) {
-            <mat-error>{{ getErrorMessage("salaId") }}</mat-error>
+            @if (sessaoForm.get('salaId')?.hasError('required') &&
+            sessaoForm.get('salaId')?.touched) {
+            <mat-error>Sala é obrigatória</mat-error>
             }
           </mat-form-field>
         </div>
@@ -145,9 +147,11 @@
               matInput
               type="datetime-local"
               formControlName="dataHoraSessao"
+              [min]="getCurrentDateTime()"
             />
-            @if (getErrorMessage('dataHoraSessao')) {
-            <mat-error>{{ getErrorMessage("dataHoraSessao") }}</mat-error>
+            @if (sessaoForm.get('dataHoraSessao')?.hasError('required') &&
+            sessaoForm.get('dataHoraSessao')?.touched) {
+            <mat-error>Data e hora são obrigatórias</mat-error>
             }
           </mat-form-field>
         </div>

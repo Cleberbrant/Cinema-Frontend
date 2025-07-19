@@ -119,7 +119,12 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    console.log(
+      'Token obtido do localStorage:',
+      token ? 'Token existe' : 'Token não encontrado'
+    );
+    return token;
   }
 
   isAuthenticated(): boolean {

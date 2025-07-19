@@ -5,13 +5,19 @@
       <p>Gerencie seu sistema de cinema</p>
     </div>
 
+    @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Carregando dados...</p>
+    </div>
+    } @else {
     <div class="dashboard-grid">
       <div class="card stat-card" routerLink="/admin/filmes">
         <div class="stat-content">
           <mat-icon class="stat-icon">movie</mat-icon>
           <div class="stat-info">
             <h3>Filmes</h3>
-            <p class="stat-number">{{ totalFilmes }}</p>
+            <p class="stat-number">{{ totalFilmes() }}</p>
             <span class="stat-label">Cadastrados</span>
           </div>
         </div>
@@ -25,7 +31,7 @@
           <mat-icon class="stat-icon">location_city</mat-icon>
           <div class="stat-info">
             <h3>Cinemas</h3>
-            <p class="stat-number">{{ totalCinemas }}</p>
+            <p class="stat-number">{{ totalCinemas() }}</p>
             <span class="stat-label">Ativos</span>
           </div>
         </div>
@@ -39,8 +45,8 @@
           <mat-icon class="stat-icon">event</mat-icon>
           <div class="stat-info">
             <h3>Sessões</h3>
-            <p class="stat-number">{{ totalSessoes }}</p>
-            <span class="stat-label">Hoje</span>
+            <p class="stat-number">{{ totalSessoes() }}</p>
+            <span class="stat-label">Cadastradas</span>
           </div>
         </div>
         <button mat-icon-button class="card-action">
@@ -53,7 +59,7 @@
           <mat-icon class="stat-icon">local_dining</mat-icon>
           <div class="stat-info">
             <h3>Alimentos</h3>
-            <p class="stat-number">{{ totalAlimentos }}</p>
+            <p class="stat-number">{{ totalAlimentos() }}</p>
             <span class="stat-label">Disponíveis</span>
           </div>
         </div>
@@ -84,5 +90,6 @@
         </button>
       </div>
     </div>
+    }
   </div>
 </div>

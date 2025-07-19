@@ -112,7 +112,7 @@ export class AdminCinemas implements OnInit {
       this.editingCinema.set(cinema);
       this.cinemaForm.patchValue({
         nome: cinema.nome,
-        localidadeId: cinema.localidade?.id,
+        localidadeId: cinema.localidade?.id || '',
       });
     } else {
       this.editingCinema.set(null);
@@ -131,13 +131,32 @@ export class AdminCinemas implements OnInit {
     if (this.cinemaForm.valid) {
       this.loading.set(true);
       try {
-        const formValue = { ...this.cinemaForm.value };
+        const formValue = this.cinemaForm.value;
+        console.log('Form value:', formValue);
+        const selectedLocalidade = this.localidades().find(
+          (l) => l.id === formValue.localidadeId
+        );
+
+        if (!selectedLocalidade) {
+          this.toastr.error('Localidade não encontrada', 'Erro');
+          this.loading.set(false);
+          return;
+        }
+
+        const cinemaData = {
+          nome: formValue.nome,
+          localidade: selectedLocalidade,
+        };
+
+        console.log('Cinema data to send:', cinemaData);
 
         if (this.editingCinema()) {
           this.cinemaService
-            .updateCinema(this.editingCinema()!.id!, formValue)
+            .updateCinema(this.editingCinema()!.id!, cinemaData)
             .subscribe({
-              next: () => {
+              next: (response) => {
+                console.log('Cinema updated successfully:', response);
+                this.loading.set(false);
                 this.toastr.success(
                   'Cinema atualizado com sucesso!',
                   'Sucesso'
@@ -145,25 +164,30 @@ export class AdminCinemas implements OnInit {
                 this.closeForm();
                 this.loadCinemas();
               },
-              error: () => {
+              error: (error) => {
+                console.error('Erro ao atualizar cinema:', error);
                 this.toastr.error('Erro ao atualizar cinema', 'Erro');
                 this.loading.set(false);
               },
             });
         } else {
-          this.cinemaService.createCinema(formValue).subscribe({
-            next: () => {
+          this.cinemaService.createCinema(cinemaData).subscribe({
+            next: (response) => {
+              console.log('Cinema created successfully:', response);
+              this.loading.set(false);
               this.toastr.success('Cinema criado com sucesso!', 'Sucesso');
               this.closeForm();
               this.loadCinemas();
             },
-            error: () => {
+            error: (error) => {
+              console.error('Erro ao criar cinema:', error);
               this.toastr.error('Erro ao criar cinema', 'Erro');
               this.loading.set(false);
             },
           });
         }
       } catch (error) {
+        console.error('Erro ao salvar cinema:', error);
         this.toastr.error('Erro ao salvar cinema', 'Erro');
         this.loading.set(false);
       }
@@ -176,15 +200,18 @@ export class AdminCinemas implements OnInit {
       try {
         this.cinemaService.deleteCinema(cinema.id!).subscribe({
           next: () => {
+            this.loading.set(false);
             this.toastr.success('Cinema excluído com sucesso!', 'Sucesso');
             this.loadCinemas();
           },
-          error: () => {
+          error: (error) => {
+            console.error('Erro ao excluir cinema:', error);
             this.toastr.error('Erro ao excluir cinema', 'Erro');
             this.loading.set(false);
           },
         });
       } catch (error) {
+        console.error('Erro ao excluir cinema:', error);
         this.toastr.error('Erro ao excluir cinema', 'Erro');
         this.loading.set(false);
       }
