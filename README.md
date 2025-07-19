@@ -286,22 +286,6 @@ npm test                    # Executar testes unitários
 npm run ng                  # Executar comandos do Angular CLI
 ```
 
-## 🤝 Contribuição
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
-3. Faça commit das mudanças (`git commit -m 'Adiciona nova feature'`)
-4. Faça push para a branch (`git push origin feature/nova-feature`)
-5. Abra um Pull Request
-
-### Padrões de Código
-
-- Use **TypeScript** com tipagem forte
-- Siga os padrões do **Angular Style Guide**
-- Use **Angular Signals** para estado reativo
-- Implemente **tratamento de erros** adequado
-- Adicione **testes unitários** para novas funcionalidades
-
 ## 🐛 Troubleshooting
 
 ### Problemas Comuns
@@ -331,7 +315,3 @@ npm run start:proxy
 ## 📄 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para detalhes.
-
----
-
-**Desenvolvido com ❤️ usando Angular 20**
