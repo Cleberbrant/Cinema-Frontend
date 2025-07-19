@@ -25,6 +25,13 @@
           <mat-icon>arrow_drop_down</mat-icon>
         </button>
         <mat-menu #userMenu="matMenu">
+          @if (authService.isAdmin()) {
+          <button mat-menu-item routerLink="/admin">
+            <mat-icon>admin_panel_settings</mat-icon>
+            <span>Painel Admin</span>
+          </button>
+          <mat-divider></mat-divider>
+          }
           <button mat-menu-item (click)="logout()">
             <mat-icon>logout</mat-icon>
             <span>Sair</span>

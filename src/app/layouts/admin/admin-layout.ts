@@ -7,10 +7,7 @@ import { AdminSidebar } from '../../components/admin-sidebar/admin-sidebar';
   selector: 'app-admin-layout',
   standalone: true,
   imports: [CommonModule, RouterOutlet, AdminSidebar],
-  template: `
-    <app-admin-sidebar></app-admin-sidebar>
-    <router-outlet></router-outlet>
-  `,
+  templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.scss',
 })
 export class AdminLayout {}

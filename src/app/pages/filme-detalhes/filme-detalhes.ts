@@ -76,7 +76,10 @@ export class FilmeDetalhes implements OnInit {
   }
 
   formatDuracao(duracao: Duracao): string {
-    const totalMinutos = duracao.hour * 60 + duracao.minute;
+    if (!duracao) return '';
+    const hour = duracao.hour ?? 0;
+    const minute = duracao.minute ?? 0;
+    const totalMinutos = hour * 60 + minute;
     const horas = Math.floor(totalMinutos / 60);
     const minutos = totalMinutos % 60;
 

@@ -56,13 +56,12 @@
       }
     </section>
 
-    <!-- Seção de Filmes em Cartaz -->
+    <!-- Seção de Filmes -->
     <section class="section" id="filmes">
       <div class="section-header">
-        <h2 class="section-title">Filmes em Cartaz</h2>
-        <p class="section-subtitle">
-          Confira os lançamentos e filmes em exibição
-        </p>
+        <h2 class="section-title">Filmes</h2>
+        <!-- Mudei o título para "Filmes" (geral) -->
+        <p class="section-subtitle">Confira todos os filmes disponíveis</p>
       </div>
 
       @if (loadingFilmes()) {
@@ -70,9 +69,11 @@
         <mat-spinner></mat-spinner>
         <p>Carregando filmes...</p>
       </div>
+      } @else { @if (filmes().length === 0) {
+      <p>Nenhum filme disponível no momento.</p>
       } @else {
       <div class="grid grid-4">
-        @for (filme of filmesEmCartaz(); track filme.id) {
+        @for (filme of filmes(); track filme.id) {
         <div class="card filme-card" (click)="verDetalhesFilme(filme.id!)">
           <div class="filme-poster">
             @if (filme.posterUrl) {
@@ -110,7 +111,7 @@
         </div>
         }
       </div>
-      }
+      } }
     </section>
   </div>
 </div>

@@ -32,25 +32,79 @@ export class AuthService {
         this.currentUserSubject.next(user);
         this.currentUser.set(user);
       } else {
-        // Limpar dados inválidos
-        this.logout();
+        this.clearSession();
       }
     } catch (error) {
       console.error('Erro ao inicializar usuário:', error);
-      this.logout();
+      this.clearSession();
     }
   }
 
-  login(credentials: LoginRequest): Observable<LoginResponse> {
+  private clearSession(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('currentUser');
+    this.currentUserSubject.next(null);
+    this.currentUser.set(null);
+  }
+
+  login(credentials: LoginRequest): Observable<any> {
     return this.http
-      .post<LoginResponse>(`${environment.authUrl}/login`, credentials)
+      .post<any>(`${environment.authUrl}/login`, credentials)
       .pipe(
-        tap((response) => {
-          // Armazenar o token e usuário
-          localStorage.setItem('token', response.token);
-          localStorage.setItem('currentUser', JSON.stringify(response.user));
-          this.currentUserSubject.next(response.user);
-          this.currentUser.set(response.user);
+        tap((response: any) => {
+          let user: User | null = null;
+          let token: string | null = null;
+
+          if (response) {
+            // Extrair o token
+            token = response.token || response.accessToken || response.jwt;
+
+            if (token) {
+              // Decodificar o JWT para extrair os dados do usuário
+              try {
+                const payload = this.decodeJWT(token);
+
+                // Extrair dados do usuário do JWT
+                user = {
+                  id: payload.id || payload.sub || payload.userId,
+                  nome: payload.nome || payload.name || payload.username,
+                  email: payload.email,
+                  cpf: payload.cpf,
+                  dataNascimento: payload.dataNascimento || payload.birthDate,
+                  role:
+                    payload.role || payload.authorities?.[0] || payload.scope,
+                  localidade: payload.localidade || {
+                    id: 1,
+                    endereco: '',
+                    cep: '',
+                    referencia: '',
+                  },
+                };
+              } catch (error) {
+                console.error('Error decoding JWT:', error);
+                throw new Error('Invalid JWT token');
+              }
+            }
+
+            // Tentar extrair o usuário dos campos da resposta (fallback)
+            if (!user && response.user) {
+              user = response.user;
+            } else if (!user && response.usuario) {
+              user = response.usuario;
+            } else if (!user && response.data) {
+              user = response.data;
+            }
+          }
+
+          if (token && user) {
+            // Armazenar o token e usuário
+            localStorage.setItem('token', token);
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            this.currentUserSubject.next(user);
+            this.currentUser.set(user);
+          } else {
+            throw new Error('Invalid login response format');
+          }
         })
       );
   }
@@ -60,11 +114,8 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('currentUser');
-    this.currentUserSubject.next(null);
-    this.currentUser.set(null);
-    this.router.navigate(['/home']); // ← ADICIONAR APENAS ESTA LINHA
+    this.clearSession();
+    this.router.navigate(['/home']);
   }
 
   getToken(): string | null {
@@ -78,7 +129,7 @@ export class AuthService {
 
   isAdmin(): boolean {
     const user = this.currentUser();
-    return user?.role === 'ADMIN' || user?.role === 'ROLE_ADMIN'; // ← ADICIONAR || user?.role === 'ROLE_ADMIN'
+    return user?.role === 'ADMIN' || user?.role === 'ROLE_ADMIN';
   }
 
   getCurrentUser(): User | null {
@@ -88,10 +139,20 @@ export class AuthService {
 
   private isTokenExpired(token: string): boolean {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.exp < Date.now() / 1000;
+      const payload = this.decodeJWT(token);
+      const isExpired = payload.exp < Date.now() / 1000;
+      return isExpired;
     } catch (error) {
+      console.error('Error parsing token:', error);
       return true;
+    }
+  }
+
+  private decodeJWT(token: string): any {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch (error) {
+      throw new Error('Invalid JWT token format');
     }
   }
 }

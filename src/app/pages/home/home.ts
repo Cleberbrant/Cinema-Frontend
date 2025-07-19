@@ -24,13 +24,13 @@ export class Home implements OnInit {
   private router = inject(Router);
 
   cinemas = signal<Cinema[]>([]);
-  filmesEmCartaz = signal<Filme[]>([]);
+  filmes = signal<Filme[]>([]); // Mudei de filmesEmCartaz para filmes (lista geral)
   loading = signal(false);
   loadingFilmes = signal(false);
 
   ngOnInit(): void {
     this.loadCinemas();
-    this.loadFilmesEmCartaz();
+    this.loadFilmes(); // Mudei para loadFilmes (geral)
   }
 
   private loadCinemas(): void {
@@ -47,17 +47,23 @@ export class Home implements OnInit {
     });
   }
 
-  private loadFilmesEmCartaz(): void {
+  private loadFilmes(): void {
+    // Novo método para lista geral
     this.loadingFilmes.set(true);
-    this.filmeService.getFilmesEmCartaz().subscribe({
+    console.log('Iniciando carregamento de filmes gerais'); // Log adicionado
+
+    this.filmeService.getFilmes().subscribe({
+      // Trocado para getFilmes() - lista todos
       next: (filmes) => {
-        this.filmesEmCartaz.set(filmes);
+        console.log('Filmes gerais recebidos do backend:', filmes); // Log para ver a resposta
+        this.filmes.set(filmes);
         this.loadingFilmes.set(false);
       },
       error: (error) => {
-        console.error('Erro ao carregar filmes:', error);
+        console.error('Erro na requisição de filmes gerais:', error); // Log detalhado
         this.loadingFilmes.set(false);
       },
+      complete: () => console.log('Requisição de filmes gerais completa'), // Confirma fim
     });
   }
 

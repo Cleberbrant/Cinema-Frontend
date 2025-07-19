@@ -20,8 +20,10 @@ export class FilmeService {
     return this.http.get<Filme>(`${this.apiUrl}/${id}`);
   }
 
-  getFilmesEmCartaz(): Observable<Filme[]> {
-    return this.http.get<Filme[]>(`${this.apiUrl}/em-cartaz`);
+  getFilmesEmCartaz(status: boolean = true): Observable<Filme[]> {
+    const url = `${this.apiUrl}/em-cartaz/${status}`;
+    console.log('Chamando endpoint de filmes em cartaz:', url); // Log adicionado
+    return this.http.get<Filme[]>(url);
   }
 
   createFilme(filme: Filme): Observable<Filme> {
